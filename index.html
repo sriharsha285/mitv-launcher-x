@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mi TV Studio PRO</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; outline: none; }
+  html, body {
+    width: 100%;
+    height: 100%;
+    background-color: #07080c;
+    color: #ffffff;
+    font-family: Roboto, 'Segoe UI', Helvetica, Arial, sans-serif;
+    overflow: hidden;
+    position: relative;
+  }
+  .fanart-container {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 1;
+    overflow: hidden;
+  }
+  .fanart-img {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-size: cover;
+    background-position: center 20%;
+    transition: background-image 0.4s ease-out;
+  }
+  .fanart-vignette {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, #07080c 0%, rgba(7,8,12,0.92) 38%, rgba(7,8,12,0.3) 100%),
+                linear-gradient(0deg, #07080c 0%, rgba(7,8,12,0.95) 35%, rgba(7,8,12,0.2) 75%, rgba(7,8,12,0.8) 100%);
+  }
+  .ui-layer {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 28px 44px;
+  }
+  .top-bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  .brand-pill {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 1.2px;
+  }
+  .brand-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background-color: #e50914;
+    margin-right: 10px;
+    box-shadow: 0 0 12px #e50914;
+  }
+  .nav-pills {
+    display: flex;
+    flex-direction: row;
+    background-color: rgba(20, 22, 30, 0.85);
+    padding: 5px 8px;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+  .nav-tab {
+    background: transparent;
+    border: 2px solid transparent;
+    color: #a1a1aa;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 7px 18px;
+    margin: 0 4px;
+    border-radius: 24px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .nav-tab.active-tab {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+  .nav-tab.focused {
+    color: #ffffff;
+    border-color: #ffffff;
+    background-color: #e50914;
+    box-shadow: 0 0 18px rgba(229, 9, 20, 0.7);
+    transform: scale(1.06);
+  }
+  .top-right {
+    display: flex;
+    align-items: center;
+  }
+  .saver-trigger {
+    background-color: rgba(20, 22, 30, 0.85);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    color: #e4e4e7;
+    padding: 7px 15px;
+    margin-right: 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .saver-trigger.focused {
+    border-color: #ffffff;
+    background-color: #2563eb;
+    transform: scale(1.08);
+  }
+  .clock {
+    font-size: 22px;
+    font-weight: 800;
+  }
+  .hero-stage {
+    max-width: 620px;
+    margin-top: 10px;
+    margin-bottom: auto;
+  }
+  .hero-badge-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .badge-pill {
+    background-color: #e50914;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 5px;
+    margin-right: 10px;
+    text-transform: uppercase;
+  }
+  .badge-meta {
+    font-size: 13px;
+    font-weight: 600;
+    color: #d4d4d8;
+  }
+  .hero-title {
+    font-size: 38px;
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 8px;
+    text-shadow: 0 4px 16px rgba(0,0,0,0.9);
+  }
+  .hero-desc {
+    font-size: 14px;
+    color: #d4d4d8;
+    line-height: 1.4;
+    margin-bottom: 16px;
+  }
+  .hero-actions {
+    display: flex;
+    flex-direction: row;
+  }
+  .hero-btn {
+    background-color: rgba(255, 255, 255, 0.14);
+    border: 2px solid rgba(255, 255, 255, 0.28);
+    color: #ffffff;
+    padding: 10px 22px;
+    margin-right: 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 800;
+    transition: all 0.18s ease;
+  }
+  .hero-btn.primary {
+    background-color: #ffffff;
+    color: #090a0f;
+  }
+  .hero-btn.focused {
+    transform: scale(1.07);
+    border-color: #ffffff;
+    background-color: #e50914;
+    color: #ffffff;
+    box-shadow: 0 6px 24px rgba(229, 9, 20, 0.7);
+  }
+  .rows-viewport {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  .row-section {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+  }
+  .row-header {
+    font-size: 15px;
+    font-weight: 800;
+    color: #e4e4e7;
+    margin-bottom: 6px;
+    letter-spacing: 0.4px;
+  }
+  .cards-track {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 8px 6px 12px 6px;
+  }
+  .cards-track::-webkit-scrollbar { display: none; }
+  .tv-card {
+    position: relative;
+    width: 205px;
+    height: 118px;
+    margin-right: 16px;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #14161f;
+    border: 3px solid rgba(255, 255, 255, 0.12);
+    flex-shrink: 0;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .card-bg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    opacity: 0.85;
+  }
+  .card-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(0deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0.1) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 10px 12px;
+  }
+  .card-tag {
+    position: absolute;
+    top: 8px; right: 8px;
+    z-index: 2;
+    background-color: rgba(0, 0, 0, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 800;
+    color: #ffffff;
+  }
+  .card-tag.live {
+    background-color: #dc2626;
+    border-color: #ef4444;
+  }
+  .card-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #ffffff;
+  }
+  .card-sub {
+    font-size: 11px;
+    color: #cbd5e1;
+    margin-top: 2px;
+  }
+  .tv-card.focused {
+    transform: scale(1.1) translateY(-4px);
+    border-color: #ffffff;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.9), 0 0 20px rgba(229, 9, 20, 0.65);
+    z-index: 5;
+  }
+  .player-modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #000000;
+    z-index: 200;
+    display: none;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .player-modal.open { display: flex; }
+  .player-video {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    object-fit: contain;
+    background-color: #000000;
+  }
+  .player-hud {
+    position: relative;
+    z-index: 210;
+    background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 65%, transparent 100%);
+    padding: 26px 48px;
+  }
+  .player-title { font-size: 24px; font-weight: 800; margin-bottom: 12px; }
+  .player-controls { display: flex; flex-direction: row; }
+  .player-btn {
+    background-color: rgba(255,255,255,0.18);
+    border: 2px solid rgba(255,255,255,0.3);
+    color: #ffffff;
+    padding: 9px 18px;
+    margin-right: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .player-btn.focused {
+    background-color: #e50914;
+    border-color: #ffffff;
+    transform: scale(1.08);
+  }
+  .ambient-modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #000000;
+    z-index: 300;
+    display: none;
+  }
+  .ambient-modal.open { display: block; }
+  .ambient-img { width: 100%; height: 100%; object-fit: cover; }
+  .ambient-info {
+    position: absolute;
+    bottom: 40px; left: 48px;
+    background-color: rgba(10, 12, 18, 0.85);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 16px 24px;
+    border-radius: 14px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="fanart-container">
+    <div class="fanart-img" id="fanart-bg"></div>
+    <div class="fanart-vignette"></div>
+  </div>
+
+  <div class="ui-layer">
+    <header class="top-bar">
+      <div class="brand-pill">
+        <div class="brand-dot" id="brand-dot"></div>
+        <span>MI TV STUDIO PRO</span>
+      </div>
+      <nav class="nav-pills">
+        <button class="nav-tab active-tab" data-tab="home">Home</button>
+        <button class="nav-tab" data-tab="cinema">Cinema Mode</button>
+        <button class="nav-tab" data-tab="sports">Live Sports</button>
+        <button class="nav-tab" data-tab="photos">Family Photos</button>
+      </nav>
+      <div class="top-right">
+        <button class="saver-trigger" id="btn-ambient">Ambient Art</button>
+        <div class="clock" id="clock">12:00</div>
+      </div>
+    </header>
+
+    <section class="hero-stage">
+      <div class="hero-badge-row">
+        <span class="badge-pill" id="hero-badge">FEATURED</span>
+        <span class="badge-meta" id="hero-meta">4K Dolby Vision • Atmos</span>
+      </div>
+      <h1 class="hero-title" id="hero-title">YouTube 4K</h1>
+      <p class="hero-desc" id="hero-desc">Watch trending 4K HDR creators, live streams, music, and gaming directly on your Mi TV.</p>
+      <div class="hero-actions">
+        <button class="hero-btn primary" id="hero-btn-primary">▶ Open App</button>
+        <button class="hero-btn" id="hero-btn-trailer">🎬 Watch Preview Stream</button>
+      </div>
+    </section>
+
+    <main class="rows-viewport" id="rows-container"></main>
+  </div>
+
+  <div class="player-modal" id="player-modal">
+    <video class="player-video" id="cinema-video" playsinline></video>
+    <div class="player-hud">
+      <div class="player-title" id="player-title">Now Playing</div>
+      <div class="player-controls">
+        <button class="player-btn" id="p-toggle">⏸ Pause</button>
+        <button class="player-btn" id="p-rew">⏪ -10s</button>
+        <button class="player-btn" id="p-fwd">⏩ +10s</button>
+        <button class="player-btn" id="p-close">✖ Exit Player</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="ambient-modal" id="ambient-modal">
+    <img class="ambient-img" id="ambient-img" src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1920&q=85">
+    <div class="ambient-info">
+      <div style="font-size:22px;font-weight:800;" id="ambient-loc">Yosemite Valley, California</div>
+      <div style="font-size:13px;color:#cbd5e1;margin-top:4px;">Press any button on your Mi TV remote to wake</div>
+    </div>
+  </div>
+
+<script>
+var DATA = {
+  home: [
+    {
+      rowTitle: "Your Streaming Apps",
+      items: [
+        { title: "YouTube", sub: "4K 60fps • Live", tag: "4K HDR", accent: "#ff0033", meta: "Official Android TV App", desc: "Instant access to your subscriptions, 4K HDR channels, music videos, and live streams.", bg: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?auto=format&fit=crop&w=1280&q=80", actionType: "app", pkg: "com.google.android.youtube.tv", webUrl: "https://www.youtube.com/tv", streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" },
+        { title: "Netflix", sub: "Dolby Vision", tag: "TOP 10", accent: "#e50914", meta: "Netflix Originals • Atmos", desc: "Continue watching Stranger Things, Wednesday, Squid Game, and top cinema releases.", bg: "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?auto=format&fit=crop&w=1280&q=80", actionType: "app", pkg: "com.netflix.ninja", webUrl: "https://www.netflix.com", streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" },
+        { title: "Prime Video", sub: "Amazon Originals", tag: "UHD", accent: "#00a8e1", meta: "Included with Prime • UHD", desc: "Stream The Boys, Fallout, Mirzapur, and blockbuster theatrical rentals in UHD.", bg: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1280&q=80", actionType: "app", pkg: "com.amazon.avod.thirdpartyclient", webUrl: "https://www.primevideo.com", streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4" },
+        { title: "Disney+ Hotstar", sub: "Sports & Marvel", tag: "LIVE", accent: "#1d4ed8", meta: "Live Cricket • Marvel • HBO", desc: "Home of ICC Live Cricket, Premier League, Marvel Studios, and Hotstar Specials.", bg: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1280&q=80", actionType: "app", pkg: "in.startv.hotstar", webUrl: "https://www.hotstar.com", streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoy.mp4" },
+        { title: "JioCinema", sub: "IPL & Blockbusters", tag: "FREE 4K", accent: "#d946ef", meta: "Live Sports • HBO Originals", desc: "Watch live cricket, HBO originals, and regional blockbusters in 4K.", bg: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=1280&q=80", actionType: "app", pkg: "com.jio.media.stb.ondemand", webUrl: "https://www.jiocinema.com", streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" }
+      ]
+    },
+    {
+      rowTitle: "TV Inputs & System",
+      items: [
+        { title: "Android Settings", sub: "Wi-Fi, Display & Sound", tag: "SYSTEM", accent: "#10b981", meta: "Mi TV System Configuration", desc: "Open native Android TV settings for Wi-Fi, Bluetooth remotes, display, and apps.", bg: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1280&q=80", actionType: "settings", streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsofSteel.mp4" },
+        { title: "All Installed Apps", sub: "Open App Drawer", tag: "APPS", accent: "#8b5cf6", meta: "System App Launcher", desc: "View and launch any app installed on your MiTV-AXSO0.", bg: "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?auto=format&fit=crop&w=1280&q=80", actionType: "stream", streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsofSteel.mp4" }
+      ]
+    }
+  ],
+  cinema: [
+    {
+      rowTitle: "IMDb Top Rated — Instant Built-in Theater",
+      items: [
+        { title: "Tears of Steel", sub: "Sci-Fi • Instant Play", tag: "IMDb 8.4", accent: "#f59e0b", meta: "Sci-Fi Action • Full Stream", desc: "In a futuristic Amsterdam, a group of soldiers and scientists attempt to save the world from destructive robots.", bg: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1280&q=80", actionType: "stream", streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsofSteel.mp4" },
+        { title: "Oppenheimer", sub: "Prime Video • IMAX 4K", tag: "IMDb 8.9", accent: "#ea580c", meta: "Christopher Nolan • 3h 00m", desc: "The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.", bg: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1280&q=80", actionType: "stream", streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4" },
+        { title: "Stranger Things 5", sub: "Netflix • Dolby Vision", tag: "IMDb 8.7", accent: "#e50914", meta: "Netflix Original • Sci-Fi", desc: "Darkness returns to Hawkins one final time as Eleven and her friends unite to end the Upside Down.", bg: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1280&q=80", actionType: "stream", streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }
+      ]
+    }
+  ],
+  sports: [
+    {
+      rowTitle: "Live Arena & Match Streams",
+      items: [
+        { title: "IND 198/3 vs AUS", sub: "IND need 6 runs in 5 balls", tag: "LIVE • T20", accent: "#2563eb", meta: "ICC Men's T20 • Live Stream", desc: "Kohli 82*(49) • Hardik 34*(16) — Watch the final over live.", bg: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1280&q=80", actionType: "stream", streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" },
+        { title: "Arsenal 2 - 1 Real Madrid", sub: "Champions League • 81'", tag: "LIVE • UCL", accent: "#16a34a", meta: "UEFA Quarter-Final", desc: "High intensity second half at the Emirates.", bg: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=1280&q=80", actionType: "stream", streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4" }
+      ]
+    }
+  ],
+  photos: [
+    {
+      rowTitle: "Family Memories & Ambient Frame",
+      items: [
+        { title: "Family Vacation Album", sub: "Manali & Hills • 64 Photos", tag: "ALBUM", accent: "#10b981", meta: "Fullscreen Slideshow", desc: "Press OK on your remote to start the fullscreen family photo slideshow.", bg: "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1280&q=80", actionType: "ambient" },
+        { title: "Mountain Landscapes", sub: "Curated Earth Gallery", tag: "4K ART", accent: "#3b82f6", meta: "World Photography", desc: "Turn your Mi TV into a living picture frame.", bg: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1280&q=80", actionType: "ambient" }
+      ]
+    }
+  ]
+};
+
+var currentTab = 'home';
+var focusZone = 'cards';
+var navIdx = 0, heroIdx = 0, rowIdx = 0, colIdx = 0, playerIdx = 0;
+var activeItem = DATA.home[0].items[0];
+
+function updateClock() {
+  var d = new Date();
+  var hh = ('0' + d.getHours()).slice(-2);
+  var mm = ('0' + d.getMinutes()).slice(-2);
+  document.getElementById('clock').innerText = hh + ':' + mm;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+function triggerAction(item, forceStream) {
+  if (!item) return;
+  if (forceStream || item.actionType === 'stream') {
+    openPlayer(item.title, item.streamUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsofSteel.mp4");
+    return;
+  }
+  if (item.actionType === 'ambient') {
+    document.getElementById('ambient-modal').classList.add('open');
+    return;
+  }
+  if (item.actionType === 'settings') {
+    if (window.AndroidTV && window.AndroidTV.openSettings) {
+      window.AndroidTV.openSettings();
+    }
+    return;
+  }
+  if (item.actionType === 'app') {
+    if (window.AndroidTV && window.AndroidTV.launchApp) {
+      window.AndroidTV.launchApp(item.pkg, item.webUrl);
+    } else {
+      window.location.href = item.webUrl;
+    }
+  }
+}
+
+function renderTab(tabKey) {
+  currentTab = tabKey;
+  var tabs = document.querySelectorAll('.nav-tab');
+  for (var i = 0; i < tabs.length; i++) {
+    if (tabs[i].getAttribute('data-tab') === tabKey) tabs[i].classList.add('active-tab');
+    else tabs[i].classList.remove('active-tab');
+  }
+
+  var container = document.getElementById('rows-container');
+  container.innerHTML = '';
+  var rows = DATA[tabKey] || [];
+
+  for (var rIdx = 0; rIdx < rows.length; rIdx++) {
+    var r = rows[rIdx];
+    var sec = document.createElement('div');
+    sec.className = 'row-section';
+    sec.innerHTML = '<div class="row-header">' + r.rowTitle + '</div>';
+    var track = document.createElement('div');
+    track.className = 'cards-track';
+
+    for (var cIdx = 0; cIdx < r.items.length; cIdx++) {
+      (function(ri, ci, item) {
+        var card = document.createElement('div');
+        card.className = 'tv-card';
+        card.setAttribute('data-r', ri);
+        card.setAttribute('data-c', ci);
+        var liveClass = item.tag.indexOf('LIVE') !== -1 ? 'live' : '';
+        card.innerHTML =
+          '<img class="card-bg" src="' + item.bg + '">' +
+          '<span class="card-tag ' + liveClass + '">' + item.tag + '</span>' +
+          '<div class="card-overlay">' +
+            '<div class="card-title">' + item.title + '</div>' +
+            '<div class="card-sub">' + item.sub + '</div>' +
+          '</div>';
+        card.onclick = function() {
+          focusZone = 'cards'; rowIdx = ri; colIdx = ci;
+          applyFocus();
+          triggerAction(item, false);
+        };
+        track.appendChild(card);
+      })(rIdx, cIdx, r.items[cIdx]);
+    }
+    sec.appendChild(track);
+    container.appendChild(sec);
+  }
+  rowIdx = 0; colIdx = 0;
+  updateHero(rows[0].items[0]);
+  applyFocus();
+}
+
+function updateHero(item) {
+  if (!item) return;
+  activeItem = item;
+  document.getElementById('fanart-bg').style.backgroundImage = "url('" + item.bg + "')";
+  document.getElementById('hero-badge').innerText = item.tag;
+  document.getElementById('hero-badge').style.backgroundColor = item.accent || '#e50914';
+  document.getElementById('brand-dot').style.backgroundColor = item.accent || '#e50914';
+  document.getElementById('hero-meta').innerText = item.meta;
+  document.getElementById('hero-title').innerText = item.title;
+  document.getElementById('hero-desc').innerText = item.desc;
+  document.getElementById('hero-btn-primary').innerText = item.actionType === 'stream' ? '▶ Play Movie' : '▶ Open ' + item.title;
+}
+
+function applyFocus() {
+  var focused = document.querySelectorAll('.focused');
+  for (var i = 0; i < focused.length; i++) focused[i].classList.remove('focused');
+
+  if (focusZone === 'nav') {
+    var navs = document.querySelectorAll('.nav-tab');
+    var list = [];
+    for (var j = 0; j < navs.length; j++) list.push(navs[j]);
+    list.push(document.getElementById('btn-ambient'));
+    var target = list[navIdx];
+    if (target) {
+      target.classList.add('focused');
+      var tKey = target.getAttribute('data-tab');
+      if (tKey && tKey !== currentTab) {
+        renderTab(tKey);
+        focusZone = 'nav';
+        target.classList.add('focused');
+      }
+    }
+  } else if (focusZone === 'hero') {
+    var btns = [document.getElementById('hero-btn-primary'), document.getElementById('hero-btn-trailer')];
+    if (btns[heroIdx]) btns[heroIdx].classList.add('focused');
+  } else if (focusZone === 'cards') {
+    var rows = DATA[currentTab];
+    if (!rows || !rows[rowIdx]) return;
+    var item = rows[rowIdx].items[colIdx];
+    updateHero(item);
+    var cardEl = document.querySelector('.tv-card[data-r="' + rowIdx + '"][data-c="' + colIdx + '"]');
+    if (cardEl) {
+      cardEl.classList.add('focused');
+      if (cardEl.scrollIntoView) cardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  } else if (focusZone === 'player') {
+    var pBtns = document.querySelectorAll('.player-btn');
+    if (pBtns[playerIdx]) pBtns[playerIdx].classList.add('focused');
+  }
+}
+
+var playerModal = document.getElementById('player-modal');
+var videoEl = document.getElementById('cinema-video');
+
+function openPlayer(title, url) {
+  document.getElementById('player-title').innerText = title;
+  videoEl.src = url;
+  playerModal.classList.add('open');
+  videoEl.play();
+  focusZone = 'player'; playerIdx = 0; applyFocus();
+}
+function closePlayer() {
+  videoEl.pause(); videoEl.src = '';
+  playerModal.classList.remove('open');
+  focusZone = 'cards'; applyFocus();
+}
+
+document.getElementById('p-toggle').onclick = function() {
+  if (videoEl.paused) { videoEl.play(); this.innerText = '⏸ Pause'; }
+  else { videoEl.pause(); this.innerText = '▶ Play'; }
+};
+document.getElementById('p-rew').onclick = function() { videoEl.currentTime = Math.max(0, videoEl.currentTime - 10); };
+document.getElementById('p-fwd').onclick = function() { videoEl.currentTime += 10; };
+document.getElementById('p-close').onclick = closePlayer;
+document.getElementById('hero-btn-primary').onclick = function() { triggerAction(activeItem, false); };
+document.getElementById('hero-btn-trailer').onclick = function() { triggerAction(activeItem, true); };
+document.getElementById('btn-ambient').onclick = function() { document.getElementById('ambient-modal').classList.add('open'); };
+
+window.addEventListener('keydown', function(e) {
+  var amb = document.getElementById('ambient-modal');
+  if (amb.classList.contains('open')) {
+    e.preventDefault();
+    amb.classList.remove('open');
+    return;
+  }
+
+  var code = e.keyCode || e.which;
+  var k = e.key;
+  var isUp = (k === 'ArrowUp' || code === 38 || code === 19);
+  var isDown = (k === 'ArrowDown' || code === 40 || code === 20);
+  var isLeft = (k === 'ArrowLeft' || code === 37 || code === 21);
+  var isRight = (k === 'ArrowRight' || code === 39 || code === 22);
+  var isEnter = (k === 'Enter' || code === 13 || code === 23 || code === 66);
+  var isBack = (k === 'Escape' || k === 'Backspace' || code === 4 || code === 8);
+
+  if (focusZone === 'player') {
+    var pBtns = document.querySelectorAll('.player-btn');
+    if (isRight) { playerIdx = Math.min(pBtns.length - 1, playerIdx + 1); applyFocus(); }
+    else if (isLeft) { playerIdx = Math.max(0, playerIdx - 1); applyFocus(); }
+    else if (isEnter) { pBtns[playerIdx].click(); }
+    else if (isBack) { e.preventDefault(); closePlayer(); }
+    return;
+  }
+
+  var rows = DATA[currentTab];
+  if (isUp) {
+    e.preventDefault();
+    if (focusZone === 'cards') {
+      if (rowIdx > 0) { rowIdx--; colIdx = Math.min(colIdx, rows[rowIdx].items.length - 1); }
+      else { focusZone = 'hero'; heroIdx = 0; }
+    } else if (focusZone === 'hero') {
+      focusZone = 'nav';
+    }
+    applyFocus();
+  } else if (isDown) {
+    e.preventDefault();
+    if (focusZone === 'nav') { focusZone = 'hero'; heroIdx = 0; }
+    else if (focusZone === 'hero') { focusZone = 'cards'; rowIdx = 0; colIdx = 0; }
+    else if (focusZone === 'cards' && rowIdx < rows.length - 1) {
+      rowIdx++; colIdx = Math.min(colIdx, rows[rowIdx].items.length - 1);
+    }
+    applyFocus();
+  } else if (isRight) {
+    e.preventDefault();
+    if (focusZone === 'nav') navIdx = Math.min(4, navIdx + 1);
+    else if (focusZone === 'hero') heroIdx = Math.min(1, heroIdx + 1);
+    else if (focusZone === 'cards') colIdx = Math.min(rows[rowIdx].items.length - 1, colIdx + 1);
+    applyFocus();
+  } else if (isLeft) {
+    e.preventDefault();
+    if (focusZone === 'nav') navIdx = Math.max(0, navIdx - 1);
+    else if (focusZone === 'hero') heroIdx = Math.max(0, heroIdx - 1);
+    else if (focusZone === 'cards') colIdx = Math.max(0, colIdx - 1);
+    applyFocus();
+  } else if (isEnter) {
+    e.preventDefault();
+    if (focusZone === 'nav') {
+      var navs = document.querySelectorAll('.nav-tab');
+      if (navIdx < navs.length) navs[navIdx].click();
+      else document.getElementById('btn-ambient').click();
+    } else if (focusZone === 'hero') {
+      var btns = [document.getElementById('hero-btn-primary'), document.getElementById('hero-btn-trailer')];
+      btns[heroIdx].click();
+    } else if (focusZone === 'cards') {
+      triggerAction(rows[rowIdx].items[colIdx], false);
+    }
+  }
+});
+
+renderTab('home');
+</script>
+</body>
+</html>
